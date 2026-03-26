@@ -54,8 +54,8 @@
       </div>
 
       <div class="col-md-6">
-        <label class="form-label text-secondary">Link hình ảnh</label>
-        <input v-model="form.image" type="text" class="form-control" placeholder="http://..." />
+        <label class="form-label text-secondary">Tải ảnh lên: </label>
+       <input type="file" class="form-control" @change="handleFileUpload" />
       </div>
       <div class="col-md-6">
         <label class="form-label text-secondary">Trạng thái</label>
@@ -150,44 +150,59 @@ export default {
   name: "AdminProducts",
 
   data() {
-    return {
-      form: {
-        id: null,
-        name: "",
-        price: "",
-        category: "",
-        size: "",
-        color: "",
-        stock: 0,
-        image: "",
-        status: "ACTIVE",
-      },
-
-      products: [],
-      editingIndex: -1,
-    };
-  },
+  return {
+    form: {
+      id: null,
+      name: "",
+      price: "",
+      category: "",
+      size: "",
+      color: "",
+      stock: 0,
+      status: "ACTIVE",
+    },
+    selectedFile: null,
+    products: [],
+  };
+},
 
   mounted() {
     this.loadProducts();
   },
 
   methods: {
+
+    async addProduct() {
+  const formData = new FormData();
+
+  formData.append("name", this.form.name);
+  formData.append("price", this.form.price);
+  formData.append("category", this.form.category);
+  formData.append("size", this.form.size);
+  formData.append("color", this.form.color);
+  formData.append("stock", this.form.stock);
+  formData.append("status", this.form.status);
+
+  if (this.selectedFile) {
+    formData.append("file", this.selectedFile);
+  }
+
+  await fetch("http://localhost:8080/api/products/upload", {
+    method: "POST",
+    body: formData,
+  }
+);
+
+  this.loadProducts();
+  this.resetForm();
+},
+
     async loadProducts() {
       const res = await getProducts();
       this.products = res.data;
     },
 
-    async addProduct() {
-      if (!this.form.name || !this.form.price) {
-        alert("Vui lòng nhập đầy đủ thông tin");
-        return;
-      }
-
-      await createProduct(this.form);
-      await this.loadProducts();
-      this.resetForm();
-    },
+    
 
     editProduct(index) {
       this.form = { ...this.products[index] };
@@ -211,6 +226,10 @@ export default {
         await this.loadProducts();
       }
     },
+
+      handleFileUpload(event) {
+    this.selectedFile = event.target.files[0];
+  },
 
     resetForm() {
       this.form = {

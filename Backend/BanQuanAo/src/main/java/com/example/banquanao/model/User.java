@@ -17,6 +17,9 @@ public class User {
     @Column(unique = true)
     private String email;
 
+    @Column(unique = true)
+    private Integer soDienThoai;
+
     private String matKhau;
 
     private String vaiTro;
@@ -26,10 +29,11 @@ public class User {
     public User() {
     }
 
-    public User(Integer maUser, String ten, String email, String matKhau, String vaiTro, Boolean trangThai) {
+    public User(Integer maUser, String ten, String email, Integer soDienThoai, String matKhau, String vaiTro, Boolean trangThai) {
         this.maUser = maUser;
         this.ten = ten;
         this.email = email;
+        this.soDienThoai = soDienThoai;
         this.matKhau = matKhau;
         this.vaiTro = vaiTro;
         this.trangThai = trangThai;
@@ -57,6 +61,14 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public Integer getSoDienThoai() {
+        return soDienThoai;
+    }
+
+    public void setSoDienThoai(Integer soDienThoai) {
+        this.soDienThoai = soDienThoai;
     }
 
     public String getMatKhau() {

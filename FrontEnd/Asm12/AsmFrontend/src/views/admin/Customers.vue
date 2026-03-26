@@ -3,7 +3,7 @@
     <h2 class="mb-4">Quản lý khách hàng</h2>
 
     <!-- FORM -->
-    <div class="card mb-4">
+    <!-- <div class="card mb-4">
       <div class="card-body">
         <h5 class="mb-3">Thêm / Cập nhật khách hàng</h5>
 
@@ -39,7 +39,7 @@
           </div>
         </div>
       </div>
-    </div>
+    </div> -->
 
     <!-- DANH SÁCH -->
     <div class="card">
@@ -54,7 +54,6 @@
               <th>Email</th>
               <th>SĐT</th>
               <th>Địa chỉ</th>
-              <th width="250">Hành động</th>
             </tr>
           </thead>
 
@@ -65,17 +64,7 @@
               <td>{{ c.email }}</td>
               <td>{{ c.phone }}</td>
               <td>{{ c.address }}</td>
-              <td>
-                
-
-                <button class="btn btn-sm btn-warning me-1" @click="editCustomer(index)">
-                  Sửa
-                </button>
-
-                <button class="btn btn-sm btn-danger" @click="removeCustomer(c.id)">
-                  Xóa
-                </button>
-              </td>
+              
             </tr>
 
             <tr v-if="customers.length === 0">
@@ -93,93 +82,38 @@
 </template>
 
 <script>
+import{
+  getCustomers
+}from "@/api/user"
+
+
 export default {
-  name: "AdminCustomers",
+  name: "AdminProducts",
 
   data() {
     return {
       form: {
+        id: null,
         name: "",
         email: "",
         phone: "",
-        address: ""
+        address: "",
       },
-
-      customers: [
-        {
-          id: 1,
-          name: "Nguyễn Văn A",
-          email: "a@gmail.com",
-          phone: "0901234567",
-          address: "Hà Nội"
-        },
-        {
-          id: 2,
-          name: "Trần Thị B",
-          email: "b@gmail.com",
-          phone: "0912345678",
-          address: "TP.HCM"
-        }
-      ],
-
-      editingIndex: -1,
-      selectedCustomer: null
+      customers: [],
     };
   },
 
+  mounted() {
+    this.loadCustomers();
+  },
+
   methods: {
-    addCustomer() {
-      if (!this.form.name || !this.form.phone) {
-        alert("Vui lòng nhập tên và số điện thoại");
-        return;
-      }
-
-      this.customers.push({
-        id: Date.now(),
-        ...this.form
-      });
-
-      this.resetForm();
-    },
-
-    editCustomer(index) {
-      this.form = { ...this.customers[index] };
-      this.editingIndex = index;
-    },
-
-    updateCustomer() {
-      if (this.editingIndex === -1) {
-        alert("Vui lòng chọn khách hàng cần sửa");
-        return;
-      }
-
-      this.customers[this.editingIndex] = {
-        ...this.customers[this.editingIndex],
-        ...this.form
-      };
-
-      this.resetForm();
-    },
-
-    viewDetail(customer) {
-      this.selectedCustomer = customer;
-    },
-
-    removeCustomer(id) {
-      if (confirm("Bạn có chắc muốn xóa khách hàng này?")) {
-        this.customers = this.customers.filter(c => c.id !== id);
-      }
-    },
-
-    resetForm() {
-      this.form = {
-        name: "",
-        email: "",
-        phone: "",
-        address: ""
-      };
-      this.editingIndex = -1;
+    async loadCustomers() {
+      const res = await getCustomers();
+      this.customers = res.data;
     }
   }
 };
+
+
 </script>

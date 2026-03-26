@@ -24,6 +24,11 @@
             </RouterLink>
           </li>
           <li class="nav-item">
+            <RouterLink class="nav-link" to="/admin/category">
+              Quản lý loại sản phẩm
+            </RouterLink>
+          </li>
+          <li class="nav-item">
             <RouterLink class="nav-link" to="/admin/orders">
               Quản lý đơn hàng
             </RouterLink>
@@ -38,17 +43,12 @@
               Quản lý khách hàng
             </RouterLink>
           </li>
-
+          
           <li class="nav-item mt-4">
             <button class="btn btn-danger w-100" @click="logout">
               Đăng xuất
             </button>
           </li>
-          <!-- <li class="nav-item">
-            <RouterLink class="nav-link" to="/admin/sale">
-              Bán hàng
-            </RouterLink>
-          </li> -->
         </ul>
       </aside>
 
@@ -66,22 +66,18 @@
 </template>
 
 <script>
-
-
 export default {
   name: "AdminLayout",
 
-methods: {
-  logout() {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
+  methods: {
+    logout() {
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
 
-    this.$router.push("/login");
-  }
-}
+      this.$router.push("/login");
+    },
+  },
 };
-
-
 </script>
 
 <style scoped>
@@ -93,7 +89,7 @@ methods: {
 .sidebar {
   width: 240px;
   min-width: 240px; /* Thêm dòng này để khóa cứng độ rộng tối thiểu */
-  flex-shrink: 0;   /* Thêm dòng này để ngăn Flexbox bóp nghẹt sidebar */
+  flex-shrink: 0; /* Thêm dòng này để ngăn Flexbox bóp nghẹt sidebar */
   min-height: calc(100vh - 56px - 40px);
 }
 
@@ -108,4 +104,3 @@ methods: {
   border-radius: 4px;
 }
 </style>
-

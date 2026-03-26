@@ -71,6 +71,10 @@ public class ProductService {
         );
     }
 
+    public ProductDTO createWithImage(Product p) {
+        return toDTO(repo.save(p));
+    }
+
     private Product toEntity(ProductDTO dto) {
         return new Product(
                 dto.getId(),

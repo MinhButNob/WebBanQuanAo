@@ -25,7 +25,12 @@ public class Product {
 
     private String image;
 
-    private String status; // ACTIVE / INACTIVE
+    private String status;
+    // ACTIVE / INACTIVE
+    // 🔥 JOIN TABLE
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category categoryId;
 
     public Product() {
     }
@@ -40,6 +45,7 @@ public class Product {
         this.stock = stock;
         this.image = image;
         this.status = status;
+        this.categoryId = categoryId;
     }
 
     public Long getId() {
@@ -112,5 +118,13 @@ public class Product {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public Category getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Category categoryId) {
+        this.categoryId = categoryId;
     }
 }
