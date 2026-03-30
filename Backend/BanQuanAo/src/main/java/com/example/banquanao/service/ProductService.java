@@ -4,6 +4,7 @@ package com.example.banquanao.service;
 
 import com.example.banquanao.dto.ProductDTO;
 import com.example.banquanao.model.Product;
+import com.example.banquanao.repository.CategoryRepository;
 import com.example.banquanao.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 
@@ -15,8 +16,11 @@ public class ProductService {
 
     private final ProductRepository repo;
 
-    public ProductService(ProductRepository repo) {
+    private final CategoryRepository categoryRepo;
+
+    public ProductService(ProductRepository repo, CategoryRepository categoryRepo) {
         this.repo = repo;
+        this.categoryRepo = categoryRepo;
     }
 
     public List<ProductDTO> getAll() {
@@ -39,16 +43,20 @@ public class ProductService {
 
         p.setName(dto.getName());
         p.setPrice(dto.getPrice());
-        p.setCategory(dto.getCategory());
         p.setSize(dto.getSize());
         p.setColor(dto.getColor());
         p.setStock(dto.getStock());
         p.setImage(dto.getImage());
         p.setStatus(dto.getStatus());
+        p.setDescription(dto.getDescription());
+
+        // ✅ THÊM DÒNG NÀY
+        if (dto.getCategoryId() != null) {
+            p.setCategory(categoryRepo.findById(dto.getCategoryId()).orElse(null));
+        }
 
         return toDTO(repo.save(p));
     }
-
 
     public void delete(Long id) {
         Product p = repo.findById(id).orElseThrow();
@@ -62,12 +70,14 @@ public class ProductService {
                 p.getId(),
                 p.getName(),
                 p.getPrice(),
-                p.getCategory(),
                 p.getSize(),
                 p.getColor(),
                 p.getStock(),
                 p.getImage(),
-                p.getStatus()
+                p.getStatus(),
+                p.getDescription(),
+                p.getCategory() != null ? p.getCategory().getId() : null,
+                p.getCategory() != null ? p.getCategory().getName() : null
         );
     }
 
@@ -76,16 +86,26 @@ public class ProductService {
     }
 
     private Product toEntity(ProductDTO dto) {
-        return new Product(
-                dto.getId(),
-                dto.getName(),
-                dto.getPrice(),
-                dto.getCategory(),
-                dto.getSize(),
-                dto.getColor(),
-                dto.getStock(),
-                dto.getImage(),
-                dto.getStatus()
-        );
+        Product p = new Product();
+
+        p.setId(dto.getId());
+        p.setName(dto.getName());
+        p.setPrice(dto.getPrice());
+        p.setSize(dto.getSize());
+        p.setColor(dto.getColor());
+        p.setStock(dto.getStock());
+        p.setImage(dto.getImage());
+        p.setStatus(dto.getStatus());
+        p.setDescription(dto.getDescription());
+
+        if (dto.getCategoryId() != null) {
+            p.setCategory(
+                    categoryRepo.findById(dto.getCategoryId()).orElse(null)
+            );
+        }
+
+        return p;
     }
+
+
 }

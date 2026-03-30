@@ -1,249 +1,330 @@
 <template>
   <div>
     <h2 class="mb-4">Quản lý sản phẩm</h2>
-<div class="card mb-4 shadow-sm">
-  <div class="card-header bg-light py-3">
-    <h6 class="mb-0 fw-bold">Cập nhật sản phẩm</h6>
-  </div>
 
-  <div class="card-body">
-    <div class="row g-3">
-      
-      <div class="col-md-6">
-        <label class="form-label text-secondary">Tên sản phẩm</label>
-        <input v-model="form.name" type="text" class="form-control" placeholder="Nhập tên sản phẩm" />
-      </div>
-      <div class="col-md-6">
-        <label class="form-label text-secondary">Giá</label>
-        <input v-model.number="form.price" type="number" class="form-control" placeholder="Nhập giá" />
-      </div>
+    <!-- TAB -->
+    <ul class="nav nav-tabs mb-3">
+      <li class="nav-item">
+        <button
+          class="nav-link"
+          :class="{ active: tab === 'form' }"
+          @click="tab = 'form'"
+        >
+          Thêm / Sửa
+        </button>
+      </li>
+      <li class="nav-item">
+        <button
+          class="nav-link"
+          :class="{ active: tab === 'list' }"
+          @click="tab = 'list'"
+        >
+          Danh sách
+        </button>
+      </li>
+    </ul>
 
-      <div class="col-md-6">
-        <label class="form-label text-secondary">Loại</label>
-        <select v-model="form.category" class="form-select">
-          <option value="">-- Chọn loại --</option>
-          <option>Áo</option>
-          <option>Quần</option>
-          <option>Phụ kiện</option>
-        </select>
-      </div>
-      <div class="col-md-6">
-        <label class="form-label text-secondary">Size</label>
-        <select v-model="form.size" class="form-select">
-          <option value="">-- Chọn size --</option>
-          <option>S</option>
-          <option>M</option>
-          <option>L</option>
-          <option>XL</option>
-        </select>
-      </div>
+    <!-- FORM -->
+    <div v-if="tab === 'form'" class="card p-3">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label>Tên</label>
+          <input v-model="form.name" class="form-control" />
+        </div>
 
-      <div class="col-md-6">
-        <label class="form-label text-secondary">Màu</label>
-        <select v-model="form.color" class="form-select">
-          <option value="">-- Chọn màu --</option>
-          <option>Đen</option>
-          <option>Trắng</option>
-          <option>Xanh</option>
-          <option>Đỏ</option>
-        </select>
-      </div>
-      <div class="col-md-6">
-        <label class="form-label text-secondary">Số lượng tồn kho</label>
-        <input type="number" min="0" v-model="form.stock" class="form-control" placeholder="0" />
-      </div>
+        <div class="col-md-6">
+          <label>Giá</label>
+          <input
+            v-model.number="form.price"
+            type="number"
+            class="form-control"
+          />
+        </div>
 
-      <div class="col-md-6">
-        <label class="form-label text-secondary">Tải ảnh lên: </label>
-       <input type="file" class="form-control" @change="handleFileUpload" />
-      </div>
-      <div class="col-md-6">
-        <label class="form-label text-secondary">Trạng thái</label>
-        <select v-model="form.status" class="form-select">
-          <option value="ACTIVE">Hoạt động</option>
-          <option value="INACTIVE">Ngừng bán</option>
-        </select>
-      </div>
+        <div class="col-md-6">
+          <label>Loại</label>
+          <select v-model="form.categoryId" class="form-select">
+            <option disabled value="">-- Chọn loại --</option>
+            <option v-for="c in categories" :key="c.id" :value="c.id">
+              {{ c.name }}
+            </option>
+          </select>
+        </div>
 
-      <div class="col-12 d-flex justify-content-end gap-2 mt-3">
-        <button class="btn btn-secondary px-4" @click="resetForm">Làm mới</button>
-        <button class="btn btn-primary px-4" @click="addProduct">Lưu thông tin</button>
-        <button class="btn btn-warning px-4 fw-bold" @click="updateProduct">Cập nhật</button>
-      </div>
+        <div class="col-md-6">
+          <label>Size</label>
+          <div class="d-flex gap-2 flex-wrap">
+            <label v-for="s in sizes" :key="s" class="border px-2">
+              <input type="checkbox" :value="s" v-model="form.size" />
+              {{ s }}
+            </label>
+          </div>
+        </div>
 
+        <div class="col-md-6">
+          <label>Màu</label>
+          <div class="d-flex gap-2 flex-wrap">
+            <label v-for="c in colors" :key="c" class="border px-2">
+              <input type="checkbox" :value="c" v-model="form.color" />
+              {{ c }}
+            </label>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <label>Tồn kho</label>
+          <input
+            v-model.number="form.stock"
+            type="number"
+            class="form-control"
+          />
+        </div>
+
+        <div class="col-md-6">
+          <label>Ảnh</label>
+          <input type="file" class="form-control" @change="handleFileUpload" />
+        </div>
+
+        <div class="col-md-6">
+          <label>Trạng thái</label>
+          <select v-model="form.status" class="form-select">
+            <option value="ACTIVE">Hoạt động</option>
+            <option value="INACTIVE">Ngừng</option>
+          </select>
+        </div>
+
+        <div class="col-12">
+          <label>Mô tả</label>
+          <textarea v-model="form.description" class="form-control"></textarea>
+        </div>
+
+        <div class="col-12 text-end">
+          <button class="btn btn-secondary me-2" @click="resetForm">
+            Reset
+          </button>
+
+          <button v-if="!form.id" class="btn btn-primary" @click="addProduct">
+            Thêm
+          </button>
+
+          <button v-if="form.id" class="btn btn-warning" @click="updateProduct">
+            Cập nhật
+          </button>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
 
-    <!-- TABLE -->
-    <table class="table table-bordered align-middle">
-      <thead class="table-dark">
-        <tr>
-          <th>#</th>
-          <th>Tên</th>
-          <th>Giá</th>
-          <th>Loại</th>
-          <th>Size</th>
-          <th>Màu</th>
-          <th>Tồn kho</th>
-          <th>Trạng thái</th>
-          <th>Hình</th>
-          <th width="220">Hành động</th>
-        </tr>
-      </thead>
+    <!-- LIST -->
+    <div v-if="tab === 'list'">
+      <input
+        v-model="keyword"
+        class="form-control mb-3"
+        placeholder="Tìm theo tên..."
+      />
 
-      <tbody>
-        <tr v-for="(product, index) in products" :key="product.id">
-          <td>{{ index + 1 }}</td>
-          <td>{{ product.name }}</td>
-          <td>{{ product.price.toLocaleString() }} đ</td>
-          <td>{{ product.category }}</td>
-          <td>{{ product.size }}</td>
-          <td>{{ product.color }}</td>
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Tên</th>
+            <th>Giá</th>
+            <th>Size</th>
+            <th>Màu</th>
+            <th>Loại</th>
+            <th>Hình</th>
+            <th>Trạng thái</th>
+            <th>Hành động</th>
+          </tr>
+        </thead>
 
-          <td>
-            <span :class="product.stock > 0 ? 'text-success' : 'text-danger'">
-              {{ product.stock }}
-            </span>
-          </td>
-
-          <!-- STATUS -->
-          <td>
-            <span :class="product.status === 'ACTIVE' ? 'text-success' : 'text-danger'">
-              {{ product.status === 'ACTIVE' ? 'Hoạt động' : 'Ngừng bán' }}
-            </span>
-          </td>
-
-          <td>
-            <img :src="product.image" width="50" />
-          </td>
-
-          <td>
-            <button class="btn btn-sm btn-warning me-1" @click="editProduct(index)">
-              Sửa
-            </button>
-
-            <button class="btn btn-sm btn-danger" @click="deleteProduct(product.id)">
-              Xóa
-            </button>
-          </td>
-        </tr>
-
-        <tr v-if="products.length === 0">
-          <td colspan="10" class="text-center">Chưa có sản phẩm</td>
-        </tr>
-      </tbody>
-    </table>
+        <tbody>
+          <tr v-for="(p, i) in filteredProducts" :key="p.id">
+            <td>{{ i + 1 }}</td>
+            <td>{{ p.name }}</td>
+            <td>{{ formatPrice(p.price) }}</td>
+            <td>{{ p.size }}</td>
+            <td>{{ p.color }}</td>
+            <td>{{ p.categoryName }}</td>
+            <td><img :src="p.image" width="50" /></td>
+            <td>
+              <span
+                :class="p.status === 'ACTIVE' ? 'text-success' : 'text-danger'"
+              >
+                {{ p.status === "ACTIVE" ? "Hoạt động" : "Ngừng" }}
+              </span>
+            </td>
+            <td>
+              <button class="btn btn-warning btn-sm" @click="editProduct(p)">
+                Sửa
+              </button>
+              <button
+                class="btn btn-danger btn-sm"
+                @click="deleteProduct(p.id)"
+              >
+                Xóa
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </template>
 
 <script>
-
-import {
-  getProducts,
-  createProduct,
-  updateProductAPI,
-  deleteProductAPI,
-} from "@/api/product";
+import { getProducts, updateProductAPI, deleteProductAPI } from "@/api/product";
+import { getCategories } from "@/api/category";
 
 export default {
-  name: "AdminProducts",
-
   data() {
-  return {
-    form: {
-      id: null,
-      name: "",
-      price: "",
-      category: "",
-      size: "",
-      color: "",
-      stock: 0,
-      status: "ACTIVE",
+    return {
+      tab: "form",
+      keyword: "",
+      selectedFile: null,
+
+      sizes: ["S", "M", "L", "XL"],
+      colors: ["Đen", "Trắng", "Xanh", "Đỏ"],
+
+      form: {
+        id: null,
+        name: "",
+        price: "",
+        categoryId: "",
+        size: [],
+        color: [],
+        stock: 0,
+        status: "ACTIVE",
+        description: "",
+      },
+
+      products: [],
+      categories: [],
+    };
+  },
+
+  computed: {
+    filteredProducts() {
+      return this.products.filter((p) =>
+        (p.name || "").toLowerCase().includes(this.keyword.toLowerCase()),
+      );
     },
-    selectedFile: null,
-    products: [],
-  };
-},
+  },
 
   mounted() {
     this.loadProducts();
+    this.loadCategories();
   },
 
   methods: {
-
-    async addProduct() {
-  const formData = new FormData();
-
-  formData.append("name", this.form.name);
-  formData.append("price", this.form.price);
-  formData.append("category", this.form.category);
-  formData.append("size", this.form.size);
-  formData.append("color", this.form.color);
-  formData.append("stock", this.form.stock);
-  formData.append("status", this.form.status);
-
-  if (this.selectedFile) {
-    formData.append("file", this.selectedFile);
-  }
-
-  await fetch("http://localhost:8080/api/products/upload", {
-    method: "POST",
-    body: formData,
-  }
-);
-
-  this.loadProducts();
-  this.resetForm();
-},
+    validateForm() {
+      if (!this.form.name.trim()) return (alert("Tên không được trống"), false);
+      if (!this.form.price || this.form.price <= 0)
+        return (alert("Giá phải > 0"), false);
+      if (!this.form.categoryId) return (alert("Chọn loại"), false);
+      if (!this.form.size.length) return (alert("Chọn size"), false);
+      if (!this.form.color.length) return (alert("Chọn màu"), false);
+      if (this.form.stock < 0) return (alert("Tồn kho lỗi"), false);
+      if (!this.form.id && !this.selectedFile)
+        return (alert("Chọn ảnh"), false);
+      return true;
+    },
 
     async loadProducts() {
       const res = await getProducts();
       this.products = res.data;
     },
 
-    
+    async loadCategories() {
+      const res = await getCategories();
+      this.categories = res.data;
+    },
 
-    editProduct(index) {
-      this.form = { ...this.products[index] };
-      this.editingIndex = index;
+    async addProduct() {
+      if (!this.validateForm()) return;
+
+      const formData = new FormData();
+
+      Object.keys(this.form).forEach((key) => {
+        if (key === "size" || key === "color") {
+          formData.append(key, this.form[key].join(","));
+        } else {
+          formData.append(key, this.form[key]);
+        }
+      });
+
+      formData.append("price", Number(this.form.price));
+
+      if (this.selectedFile) {
+        formData.append("file", this.selectedFile);
+      }
+
+      await fetch("http://localhost:8080/api/products/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      this.afterSubmit();
     },
 
     async updateProduct() {
-      if (this.editingIndex === -1) {
-        alert("Chọn sản phẩm cần sửa");
-        return;
-      }
+      if (!this.validateForm()) return;
 
-      await updateProductAPI(this.form.id, this.form);
-      await this.loadProducts();
-      this.resetForm();
+      const data = {
+        ...this.form,
+        price: Number(this.form.price),
+        stock: Number(this.form.stock),
+        categoryId: Number(this.form.categoryId),
+        size: this.form.size.join(","),
+        color: this.form.color.join(","),
+      };
+
+      await updateProductAPI(this.form.id, data);
+      this.afterSubmit();
     },
 
     async deleteProduct(id) {
-      if (confirm("Bạn có chắc muốn xóa?")) {
+      if (confirm("Xóa sản phẩm?")) {
         await deleteProductAPI(id);
-        await this.loadProducts();
+        this.loadProducts();
       }
     },
 
-      handleFileUpload(event) {
-    this.selectedFile = event.target.files[0];
-  },
+    editProduct(p) {
+      this.form = {
+        ...p,
+        size: p.size ? p.size.split(",") : [],
+        color: p.color ? p.color.split(",") : [],
+      };
+      this.tab = "form";
+    },
+
+    handleFileUpload(e) {
+      this.selectedFile = e.target.files[0];
+    },
 
     resetForm() {
       this.form = {
         id: null,
         name: "",
         price: "",
-        category: "",
-        size: "",
-        color: "",
+        categoryId: "",
+        size: [],
+        color: [],
         stock: 0,
-        image: "",
         status: "ACTIVE",
+        description: "",
       };
-      this.editingIndex = -1;
+      this.selectedFile = null;
+    },
+
+    afterSubmit() {
+      this.loadProducts();
+      this.resetForm();
+      this.tab = "list";
+    },
+
+    formatPrice(price) {
+      return price ? price.toLocaleString() + " đ" : "0 đ";
     },
   },
 };

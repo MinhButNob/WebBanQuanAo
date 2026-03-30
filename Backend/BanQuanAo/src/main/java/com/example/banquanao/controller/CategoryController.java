@@ -30,12 +30,12 @@ public class CategoryController {
     }
 
     @PutMapping("/{id}")
-    public Category update(@PathVariable Integer id, @RequestBody Category category) {
+    public Category update(@PathVariable Long id, @RequestBody Category category) {
         return service.update(id, category);
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Integer id) {
+    public void delete(@PathVariable Long id) {
         service.delete(id);
     }
 }

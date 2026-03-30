@@ -15,7 +15,6 @@ public class Product {
 
     private Double price;
 
-    private String category;
 
     private String size;
 
@@ -26,26 +25,27 @@ public class Product {
     private String image;
 
     private String status;
-    // ACTIVE / INACTIVE
-    // 🔥 JOIN TABLE
-    @ManyToOne
+
+    private String description;
+
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "category_id")
-    private Category categoryId;
+    private Category category;
 
     public Product() {
     }
 
-    public Product(Long id, String name, Double price, String category, String size, String color, Integer stock, String image, String status) {
+    public Product(Long id, String name, Double price, String size, String color, Integer stock, String image, String status, String description, Category category) {
         this.id = id;
         this.name = name;
         this.price = price;
-        this.category = category;
         this.size = size;
         this.color = color;
         this.stock = stock;
         this.image = image;
         this.status = status;
-        this.categoryId = categoryId;
+        this.description = description;
+        this.category = category;
     }
 
     public Long getId() {
@@ -70,14 +70,6 @@ public class Product {
 
     public void setPrice(Double price) {
         this.price = price;
-    }
-
-    public String getCategory() {
-        return category;
-    }
-
-    public void setCategory(String category) {
-        this.category = category;
     }
 
     public String getSize() {
@@ -120,11 +112,19 @@ public class Product {
         this.status = status;
     }
 
-    public Category getCategoryId() {
-        return categoryId;
+    public String getDescription() {
+        return description;
     }
 
-    public void setCategoryId(Category categoryId) {
-        this.categoryId = categoryId;
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Category getCategory() {
+        return category;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
     }
 }

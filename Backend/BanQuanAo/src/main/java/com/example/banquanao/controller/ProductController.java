@@ -1,7 +1,9 @@
 package com.example.banquanao.controller;
 
 import com.example.banquanao.dto.ProductDTO;
+import com.example.banquanao.model.Category;
 import com.example.banquanao.model.Product;
+import com.example.banquanao.repository.CategoryRepository;
 import com.example.banquanao.repository.ProductRepository;
 import com.example.banquanao.service.ProductService;
 import org.springframework.web.bind.annotation.*;
@@ -21,9 +23,12 @@ public class ProductController {
 
     private final ProductRepository repo;
 
-    public ProductController(ProductService service, ProductRepository repo) {
+     CategoryRepository categoryRepo;
+
+    public ProductController(ProductService service, ProductRepository repo, CategoryRepository categoryRepo) {
         this.service = service;
         this.repo = repo;
+        this.categoryRepo = categoryRepo;
     }
 
     // GET ALL
@@ -57,16 +62,16 @@ public class ProductController {
     }
 
 
-    // ===== API UPLOAD (THÊM VÀO ĐÂY) =====
     @PostMapping("/upload")
     public ProductDTO createWithImage(
             @RequestParam("name") String name,
-            @RequestParam("price") Double price,
-            @RequestParam("category") String category,
+            @RequestParam(value = "price", required = false) Double price,
+            @RequestParam("categoryId") Long categoryId,
             @RequestParam("size") String size,
             @RequestParam("color") String color,
             @RequestParam("stock") Integer stock,
             @RequestParam("status") String status,
+            @RequestParam("description") String description,
             @RequestParam("file") MultipartFile file
     ) throws Exception {
 
@@ -77,15 +82,19 @@ public class ProductController {
         Files.write(path, file.getBytes());
 
         Product p = new Product();
+
         p.setName(name);
         p.setPrice(price);
-        p.setCategory(category);
         p.setSize(size);
         p.setColor(color);
         p.setStock(stock);
         p.setStatus(status);
-
+        p.setDescription(description);
         p.setImage("http://localhost:8080/uploads/" + fileName);
+
+        // ✅ FIX QUAN TRỌNG
+        Category c = categoryRepo.findById(categoryId).orElse(null);
+        p.setCategory(c);
 
         return service.createWithImage(p);
     }

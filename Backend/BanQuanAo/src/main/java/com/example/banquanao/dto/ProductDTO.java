@@ -1,31 +1,45 @@
 package com.example.banquanao.dto;
 
+
+
 public class ProductDTO {
 
     private Long id;
     private String name;
     private Double price;
-    private String category;
     private String size;
     private String color;
     private Integer stock;
     private String image;
     private String status;
+    private String description;
+
+    private Long categoryId;
+    private String categoryName;
 
     public ProductDTO() {
     }
 
-    public ProductDTO(Long id, String name, Double price, String category, String size, String color, Integer stock, String image, String status) {
+    public ProductDTO(Long id, String name, Double price,
+                      String size, String color, Integer stock,
+                      String image, String status, String description,
+                      Long categoryId, String categoryName) {
+
         this.id = id;
         this.name = name;
         this.price = price;
-        this.category = category;
         this.size = size;
         this.color = color;
         this.stock = stock;
         this.image = image;
         this.status = status;
+        this.description = description;
+        this.categoryId = categoryId;
+        this.categoryName = categoryName;
     }
+
+    // ===== GETTER SETTER =====
+
 
     public Long getId() {
         return id;
@@ -49,14 +63,6 @@ public class ProductDTO {
 
     public void setPrice(Double price) {
         this.price = price;
-    }
-
-    public String getCategory() {
-        return category;
-    }
-
-    public void setCategory(String category) {
-        this.category = category;
     }
 
     public String getSize() {
@@ -97,5 +103,29 @@ public class ProductDTO {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
+
+    public String getCategoryName() {
+        return categoryName;
+    }
+
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
     }
 }

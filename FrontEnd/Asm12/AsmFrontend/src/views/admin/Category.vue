@@ -5,24 +5,35 @@
     <!-- FORM -->
     <div class="card p-3 mb-4">
       <div class="row">
+        <!-- NAME -->
         <div class="col-md-4">
           <label class="form-label text-secondary">Tên loại</label>
           <input
             v-model="category.name"
             class="form-control"
+            :class="{ 'is-invalid': errors.name }"
             placeholder="Tên loại"
           />
+          <div class="invalid-feedback">
+            {{ errors.name }}
+          </div>
         </div>
 
+        <!-- DESCRIPTION -->
         <div class="col-md-4">
           <label class="form-label text-secondary">Mô tả</label>
           <input
             v-model="category.description"
             class="form-control"
+            :class="{ 'is-invalid': errors.description }"
             placeholder="Mô tả"
           />
+          <div class="invalid-feedback">
+            {{ errors.description }}
+          </div>
         </div>
 
+        <!-- STATUS -->
         <div class="col-md-4">
           <label class="form-label text-secondary">Trạng thái</label>
           <select v-model="category.status" class="form-select">
@@ -31,6 +42,7 @@
           </select>
         </div>
 
+        <!-- BUTTON -->
         <div class="col-md-4 mt-3">
           <button
             class="btn btn-primary me-2"
@@ -70,7 +82,14 @@
           <td>{{ c.id }}</td>
           <td>{{ c.name }}</td>
           <td>{{ c.description }}</td>
-          <td>{{ c.status }}</td>
+          <td>
+            <span
+              class="badge"
+              :class="c.status === 'ACTIVE' ? 'bg-success' : 'bg-secondary'"
+            >
+              {{ c.status }}
+            </span>
+          </td>
           <td>
             <button class="btn btn-warning btn-sm me-2" @click="edit(c)">
               Sửa
@@ -87,6 +106,7 @@
 
 <script>
 import axios from "axios";
+
 export default {
   data() {
     return {
@@ -97,7 +117,7 @@ export default {
         status: "ACTIVE",
       },
       categories: [],
-      errors: {} // 👈 thêm
+      errors: {},
     };
   },
 
@@ -106,59 +126,90 @@ export default {
   },
 
   methods: {
+    // ✅ VALIDATE CHUẨN
     validate() {
       this.errors = {};
 
-      if (!this.category.name) {
+      if (!this.category.name || !this.category.name.trim()) {
         this.errors.name = "Tên loại không được để trống";
-      } else if (this.category.name.length < 3) {
+      } else if (this.category.name.trim().length < 3) {
         this.errors.name = "Tên phải >= 3 ký tự";
       }
 
-      if (!this.category.description) {
+      if (!this.category.description || !this.category.description.trim()) {
         this.errors.description = "Mô tả không được để trống";
       }
 
       return Object.keys(this.errors).length === 0;
     },
 
+    // ✅ ADD
     async addCategory() {
       if (!this.validate()) return;
 
-      await axios.post("http://localhost:8080/api/categories", this.category);
-      this.reset();
-      this.loadData();
+      try {
+        await axios.post(
+          "http://localhost:8080/api/categories",
+          this.category
+        );
+        this.reset();
+        this.loadData();
+      } catch (e) {
+        console.error("Add lỗi:", e);
+        alert("Lỗi thêm!");
+      }
     },
 
+    // ✅ UPDATE
     async updateCategory() {
       if (!this.validate()) return;
 
-      await axios.put(
-        `http://localhost:8080/api/categories/${this.category.id}`,
-        this.category
-      );
-
-      this.reset();
-      this.loadData();
+      try {
+        await axios.put(
+          `http://localhost:8080/api/categories/${this.category.id}`,
+          this.category
+        );
+        this.reset();
+        this.loadData();
+      } catch (e) {
+        console.error("Update lỗi:", e);
+        alert("Lỗi cập nhật!");
+      }
     },
 
+    // ✅ LOAD
     async loadData() {
-      const res = await axios.get("http://localhost:8080/api/categories");
-      this.categories = res.data;
+      try {
+        const res = await axios.get(
+          "http://localhost:8080/api/categories"
+        );
+        this.categories = res.data;
+      } catch (e) {
+        console.error("Load lỗi:", e);
+      }
     },
 
+    // ✅ EDIT
     edit(c) {
       this.category = { ...c };
       this.errors = {};
     },
 
+    // ✅ DELETE
     async remove(id) {
-      if (confirm("Xóa loại này?")) {
-        await axios.delete(`http://localhost:8080/api/categories/${id}`);
+      if (!confirm("Xóa loại này?")) return;
+
+      try {
+        await axios.delete(
+          `http://localhost:8080/api/categories/${id}`
+        );
         this.loadData();
+      } catch (e) {
+        console.error("Delete lỗi:", e);
       }
     },
 
+    // ✅ RESET
     reset() {
       this.category = {
         id: null,
