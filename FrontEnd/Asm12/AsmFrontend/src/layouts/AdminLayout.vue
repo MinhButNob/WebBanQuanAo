@@ -29,6 +29,16 @@
             </RouterLink>
           </li>
           <li class="nav-item">
+            <RouterLink class="nav-link" to="/admin/colors">
+              Quản lý màu sắc
+            </RouterLink> 
+          </li> 
+          <li class="nav-item">
+            <RouterLink class="nav-link" to="/admin/sizes">
+              Quản lý size
+            </RouterLink> 
+          </li> 
+          <li class="nav-item">
             <RouterLink class="nav-link" to="/admin/orders">
               Quản lý đơn hàng
             </RouterLink>

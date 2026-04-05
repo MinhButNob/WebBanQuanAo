@@ -51,22 +51,32 @@
           </select>
         </div>
 
+        <!-- ✅ SỬA: Size từ API -->
         <div class="col-md-6">
           <label>Size</label>
           <div class="d-flex gap-2 flex-wrap">
-            <label v-for="s in sizes" :key="s" class="border px-2">
-              <input type="checkbox" :value="s" v-model="form.size" />
-              {{ s }}
+            <label v-for="s in sizeOptions" :key="s.id" class="border px-2">
+              <input 
+                type="checkbox" 
+                :value="s.id" 
+                v-model="form.sizeIds" 
+              />
+              {{ s.sizeName }}
             </label>
           </div>
         </div>
 
+        <!-- ✅ SỬA: Màu từ API -->
         <div class="col-md-6">
           <label>Màu</label>
           <div class="d-flex gap-2 flex-wrap">
-            <label v-for="c in colors" :key="c" class="border px-2">
-              <input type="checkbox" :value="c" v-model="form.color" />
-              {{ c }}
+            <label v-for="c in colorOptions" :key="c.id" class="border px-2">
+              <input 
+                type="checkbox" 
+                :value="c.id" 
+                v-model="form.colorIds" 
+              />
+              {{ c.colorName }}
             </label>
           </div>
         </div>
@@ -83,6 +93,9 @@
         <div class="col-md-6">
           <label>Ảnh</label>
           <input type="file" class="form-control" @change="handleFileUpload" />
+          <div v-if="form.image" class="mt-2">
+            <img :src="form.image" width="80" class="border" />
+          </div>
         </div>
 
         <div class="col-md-6">
@@ -142,10 +155,11 @@
             <td>{{ i + 1 }}</td>
             <td>{{ p.name }}</td>
             <td>{{ formatPrice(p.price) }}</td>
-            <td>{{ p.size }}</td>
-            <td>{{ p.color }}</td>
+            <!-- ✅ SỬA: Hiển thị sizeName và colorName -->
+            <td>{{ p.sizeName || 'Chưa chọn' }}</td>
+            <td>{{ p.colorName || 'Chưa chọn' }}</td>
             <td>{{ p.categoryName }}</td>
-            <td><img :src="p.image" width="50" /></td>
+            <td><img :src="p.image" width="50" height="50" style="object-fit: cover" /></td>
             <td>
               <span
                 :class="p.status === 'ACTIVE' ? 'text-success' : 'text-danger'"
@@ -154,7 +168,7 @@
               </span>
             </td>
             <td>
-              <button class="btn btn-warning btn-sm" @click="editProduct(p)">
+              <button class="btn btn-warning btn-sm me-1" @click="editProduct(p)">
                 Sửa
               </button>
               <button
@@ -172,8 +186,9 @@
 </template>
 
 <script>
-import { getProducts, updateProductAPI, deleteProductAPI } from "@/api/product";
-import { getCategories } from "@/api/category";
+import axios from "axios";
+
+const API_BASE = "http://localhost:8080/api";
 
 export default {
   data() {
@@ -182,19 +197,21 @@ export default {
       keyword: "",
       selectedFile: null,
 
-      sizes: ["S", "M", "L", "XL"],
-      colors: ["Đen", "Trắng", "Xanh", "Đỏ"],
+      // ✅ Lấy từ API
+      sizeOptions: [],
+      colorOptions: [],
 
       form: {
         id: null,
         name: "",
         price: "",
         categoryId: "",
-        size: [],
-        color: [],
+        sizeIds: [],      // ✅ Mảng chứa ID của size
+        colorIds: [],     // ✅ Mảng chứa ID của color
         stock: 0,
         status: "ACTIVE",
         description: "",
+        image: "",
       },
 
       products: [],
@@ -205,7 +222,7 @@ export default {
   computed: {
     filteredProducts() {
       return this.products.filter((p) =>
-        (p.name || "").toLowerCase().includes(this.keyword.toLowerCase()),
+        (p.name || "").toLowerCase().includes(this.keyword.toLowerCase())
       );
     },
   },
@@ -213,30 +230,60 @@ export default {
   mounted() {
     this.loadProducts();
     this.loadCategories();
+    this.loadSizes();    // ✅ Load size từ API
+    this.loadColors();   // ✅ Load color từ API
   },
 
   methods: {
     validateForm() {
-      if (!this.form.name.trim()) return (alert("Tên không được trống"), false);
+      if (!this.form.name.trim()) return alert("Tên không được trống"), false;
       if (!this.form.price || this.form.price <= 0)
-        return (alert("Giá phải > 0"), false);
-      if (!this.form.categoryId) return (alert("Chọn loại"), false);
-      if (!this.form.size.length) return (alert("Chọn size"), false);
-      if (!this.form.color.length) return (alert("Chọn màu"), false);
-      if (this.form.stock < 0) return (alert("Tồn kho lỗi"), false);
+        return alert("Giá phải > 0"), false;
+      if (!this.form.categoryId) return alert("Chọn loại"), false;
+      if (!this.form.sizeIds.length) return alert("Chọn size"), false;
+      if (!this.form.colorIds.length) return alert("Chọn màu"), false;
+      if (this.form.stock < 0) return alert("Tồn kho lỗi"), false;
       if (!this.form.id && !this.selectedFile)
-        return (alert("Chọn ảnh"), false);
+        return alert("Chọn ảnh"), false;
       return true;
     },
 
     async loadProducts() {
-      const res = await getProducts();
-      this.products = res.data;
+      try {
+        const res = await axios.get(`${API_BASE}/products`);
+        this.products = res.data;
+      } catch (e) {
+        console.error("Lỗi load products:", e);
+      }
     },
 
     async loadCategories() {
-      const res = await getCategories();
-      this.categories = res.data;
+      try {
+        const res = await axios.get(`${API_BASE}/categories`);
+        this.categories = res.data;
+      } catch (e) {
+        console.error("Lỗi load categories:", e);
+      }
+    },
+
+    // ✅ Load danh sách size
+    async loadSizes() {
+      try {
+        const res = await axios.get(`${API_BASE}/sizes`);
+        this.sizeOptions = res.data.filter(s => s.status === "ACTIVE");
+      } catch (e) {
+        console.error("Lỗi load sizes:", e);
+      }
+    },
+
+    // ✅ Load danh sách màu
+    async loadColors() {
+      try {
+        const res = await axios.get(`${API_BASE}/colors`);
+        this.colorOptions = res.data.filter(c => c.status === "ACTIVE");
+      } catch (e) {
+        console.error("Lỗi load colors:", e);
+      }
     },
 
     async addProduct() {
@@ -244,57 +291,81 @@ export default {
 
       const formData = new FormData();
 
-      Object.keys(this.form).forEach((key) => {
-        if (key === "size" || key === "color") {
-          formData.append(key, this.form[key].join(","));
-        } else {
-          formData.append(key, this.form[key]);
-        }
-      });
-
+      formData.append("name", this.form.name);
       formData.append("price", Number(this.form.price));
+      formData.append("categoryId", this.form.categoryId);
+      formData.append("sizeId", this.form.sizeIds[0]);      // ⚠️ Tạm thời lấy cái đầu tiên
+      formData.append("colorId", this.form.colorIds[0]);    // ⚠️ Tạm thời lấy cái đầu tiên
+      formData.append("stock", this.form.stock);
+      formData.append("status", this.form.status);
+      formData.append("description", this.form.description);
 
       if (this.selectedFile) {
         formData.append("file", this.selectedFile);
       }
 
-      await fetch("http://localhost:8080/api/products/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      this.afterSubmit();
+      try {
+        await axios.post(`${API_BASE}/products/upload`, formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        this.afterSubmit();
+      } catch (e) {
+        console.error("Lỗi thêm:", e);
+        alert("Thêm sản phẩm thất bại");
+      }
     },
 
     async updateProduct() {
       if (!this.validateForm()) return;
 
       const data = {
-        ...this.form,
+        id: this.form.id,
+        name: this.form.name,
         price: Number(this.form.price),
         stock: Number(this.form.stock),
         categoryId: Number(this.form.categoryId),
-        size: this.form.size.join(","),
-        color: this.form.color.join(","),
+        sizeId: this.form.sizeIds[0],      // ⚠️ Tạm thời lấy cái đầu tiên
+        colorId: this.form.colorIds[0],    // ⚠️ Tạm thời lấy cái đầu tiên
+        status: this.form.status,
+        description: this.form.description,
+        image: this.form.image,
       };
 
-      await updateProductAPI(this.form.id, data);
-      this.afterSubmit();
+      try {
+        await axios.put(`${API_BASE}/products/${this.form.id}`, data);
+        this.afterSubmit();
+      } catch (e) {
+        console.error("Lỗi cập nhật:", e);
+        alert("Cập nhật thất bại");
+      }
     },
 
     async deleteProduct(id) {
       if (confirm("Xóa sản phẩm?")) {
-        await deleteProductAPI(id);
-        this.loadProducts();
+        try {
+          await axios.delete(`${API_BASE}/products/${id}`);
+          this.loadProducts();
+        } catch (e) {
+          console.error("Lỗi xóa:", e);
+          alert("Xóa thất bại");
+        }
       }
     },
 
     editProduct(p) {
       this.form = {
-        ...p,
-        size: p.size ? p.size.split(",") : [],
-        color: p.color ? p.color.split(",") : [],
+        id: p.id,
+        name: p.name,
+        price: p.price,
+        categoryId: p.categoryId,
+        sizeIds: p.sizeId ? [p.sizeId] : [],      // ✅ Chuyển thành mảng
+        colorIds: p.colorId ? [p.colorId] : [],   // ✅ Chuyển thành mảng
+        stock: p.stock,
+        status: p.status,
+        description: p.description,
+        image: p.image,
       };
+      this.selectedFile = null;
       this.tab = "form";
     },
 
@@ -308,11 +379,12 @@ export default {
         name: "",
         price: "",
         categoryId: "",
-        size: [],
-        color: [],
+        sizeIds: [],
+        colorIds: [],
         stock: 0,
         status: "ACTIVE",
         description: "",
+        image: "",
       };
       this.selectedFile = null;
     },

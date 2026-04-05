@@ -9,6 +9,7 @@
           <thead class="table-dark">
             <tr>
               <th>Sản phẩm</th>
+              <th>Size / Màu</th>
               <th>Giá</th>
               <th width="140">Số lượng</th>
               <th>Tạm tính</th>
@@ -16,38 +17,43 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="item in cart" :key="item.id">
+            <tr v-for="(item, index) in cart" :key="index">
               <td>
                 <div class="d-flex align-items-center gap-3">
                   <img :src="item.image" class="cart-img" />
                   <span>{{ item.name }}</span>
                 </div>
               </td>
+              <td>
+                <small class="text-muted">
+                  {{ item.sizeName || 'Chưa chọn' }} / {{ item.colorName || 'Chưa chọn' }}
+                </small>
+              </td>
               <td>{{ formatPrice(item.price) }}</td>
               <td>
                 <div class="d-flex align-items-center gap-2">
                   <button
                     class="btn btn-outline-dark btn-sm"
-                    @click="decrease(item)"
+                    @click="decrease(item, index)"
                   >
                     -
                   </button>
-                  <span>{{ item.qty }}</span>
+                  <span class="mx-2">{{ item.quantity }}</span>
                   <button
                     class="btn btn-outline-dark btn-sm"
-                    @click="increase(item)"
+                    @click="increase(item, index)"
                   >
                     +
                   </button>
                 </div>
               </td>
-              <td>{{ formatPrice(item.price * item.qty) }}</td>
+              <td>{{ formatPrice(item.price * item.quantity) }}</td>
               <td>
                 <button
                   class="btn btn-sm btn-danger"
-                  @click="remove(item.id)"
+                  @click="removeItem(index)"
                 >
-                  X
+                  Xóa
                 </button>
               </td>
             </tr>
@@ -102,51 +108,105 @@ export default {
 
   data() {
     return {
-      cart: [
-        {
-          id: 1,
-          name: "Áo thun basic",
-          price: 199000,
-          qty: 1,
-          image:
-            "https://product.hstatic.net/200000690725/product/2_1f24982f91b6417c8ca97b3e7c4da4ee_master.png"
-        },
-        {
-          id: 2,
-          name: "Áo thun form rộng",
-          price: 219000,
-          qty: 2,
-          image:
-            "https://product.hstatic.net/200000690725/product/2_1f24982f91b6417c8ca97b3e7c4da4ee_master.png"
-        }
-      ]
+      cart: [],  // Sẽ được load từ localStorage
     };
   },
 
   computed: {
     total() {
       return this.cart.reduce(
-        (sum, item) => sum + item.price * item.qty,
+        (sum, item) => sum + (item.price * (item.quantity || 1)),
         0
       );
     }
   },
 
+  mounted() {
+    this.loadCart();
+    // Lắng nghe sự kiện cập nhật giỏ hàng từ các component khác
+    window.addEventListener('cart-updated', this.loadCart);
+  },
+
+  beforeUnmount() {
+    window.removeEventListener('cart-updated', this.loadCart);
+  },
+
   methods: {
-    increase(item) {
-      item.qty++;
+    // Load giỏ hàng từ localStorage
+    loadCart() {
+      const cartData = localStorage.getItem("cart");
+      if (cartData) {
+        this.cart = JSON.parse(cartData);
+      } else {
+        this.cart = [];
+      }
     },
-    decrease(item) {
-      if (item.qty > 1) item.qty--;
+
+    // Lưu giỏ hàng vào localStorage
+    saveCart() {
+      localStorage.setItem("cart", JSON.stringify(this.cart));
+      // Phát sự kiện để header cập nhật số lượng
+      window.dispatchEvent(new Event("cart-updated"));
     },
-    remove(id) {
-      this.cart = this.cart.filter(item => item.id !== id);
+
+    // Tăng số lượng
+    increase(item, index) {
+      if (!this.cart[index].quantity) {
+        this.cart[index].quantity = 1;
+      }
+      this.cart[index].quantity++;
+      this.saveCart();
     },
+
+    // Giảm số lượng
+    decrease(item, index) {
+      if (this.cart[index].quantity > 1) {
+        this.cart[index].quantity--;
+        this.saveCart();
+      } else {
+        // Nếu quantity = 1 thì hỏi có muốn xóa không
+        if (confirm("Bạn có muốn xóa sản phẩm này khỏi giỏ hàng?")) {
+          this.removeItem(index);
+        }
+      }
+    },
+
+    // Xóa sản phẩm khỏi giỏ hàng
+    removeItem(index) {
+      if (confirm("Xóa sản phẩm này khỏi giỏ hàng?")) {
+        this.cart.splice(index, 1);
+        this.saveCart();
+      }
+    },
+
+    // Xử lý đặt hàng
     checkout() {
-      alert("Đặt hàng thành công!");
+      if (this.cart.length === 0) {
+        alert("Giỏ hàng trống!");
+        return;
+      }
+      
+      // Kiểm tra đăng nhập
+      const user = localStorage.getItem("user");
+      if (!user) {
+        alert("Vui lòng đăng nhập để đặt hàng!");
+        this.$router.push("/login");
+        return;
+      }
+      
+      alert("Đặt hàng thành công! Cảm ơn bạn đã mua sắm.");
+      
+      // Xóa giỏ hàng sau khi đặt hàng thành công
       this.cart = [];
+      this.saveCart();
+      
+      // Chuyển về trang chủ (hoặc trang đơn hàng)
+      this.$router.push("/");
     },
+
+    // Format giá tiền
     formatPrice(price) {
+      if (!price && price !== 0) return "0 ₫";
       return price.toLocaleString("vi-VN") + " ₫";
     }
   }
@@ -158,5 +218,23 @@ export default {
   width: 70px;
   height: 70px;
   object-fit: cover;
+}
+
+table {
+  vertical-align: middle;
+}
+
+.btn-outline-dark {
+  transition: all 0.2s;
+}
+
+.btn-outline-dark:hover {
+  background-color: #000;
+  color: #fff;
+}
+
+.card {
+  position: sticky;
+  top: 20px;
 }
 </style>

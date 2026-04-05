@@ -12,6 +12,8 @@ import AdminSale from "../views/admin/Sale.vue";
 import AdminDashboard from "../views/admin/Dashboard.vue";
 import EmployeeManager from "@/views/admin/EmployeeManager.vue";
 import Category from "@/views/admin/Category.vue";
+import Color from "@/views/admin/Color.vue";
+
 
 import Login from "../views/auth/Login.vue";
 import Register from "../views/auth/Register.vue";
@@ -27,6 +29,7 @@ import Checkout from "../views/client/Checkout.vue";
 // IMPORT BOOTSTRAP
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
+import Size from "@/views/admin/Size.vue";
 
 
 const routes = [
@@ -54,6 +57,8 @@ const routes = [
       { path: "customers", component: AdminCustomers },
       { path: "sale", component: AdminSale },
       { path: "category", component: Category },
+      {path :"colors", component: Color},
+      {path :"sizes", component: Size}
     ],
   },
   {

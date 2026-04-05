@@ -3,9 +3,13 @@ package com.example.banquanao.service;
 
 
 import com.example.banquanao.dto.ProductDTO;
+import com.example.banquanao.model.Color;
 import com.example.banquanao.model.Product;
+import com.example.banquanao.model.Size;
 import com.example.banquanao.repository.CategoryRepository;
+import com.example.banquanao.repository.ColorRepository;
 import com.example.banquanao.repository.ProductRepository;
+import com.example.banquanao.repository.SizeRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,12 +19,18 @@ import java.util.stream.Collectors;
 public class ProductService {
 
     private final ProductRepository repo;
-
     private final CategoryRepository categoryRepo;
+    private final SizeRepository sizeRepo;      // ✅ Thêm
+    private final ColorRepository colorRepo;    // ✅ Thêm
 
-    public ProductService(ProductRepository repo, CategoryRepository categoryRepo) {
+    public ProductService(ProductRepository repo,
+                          CategoryRepository categoryRepo,
+                          SizeRepository sizeRepo,      // ✅ Thêm
+                          ColorRepository colorRepo) {  // ✅ Thêm
         this.repo = repo;
         this.categoryRepo = categoryRepo;
+        this.sizeRepo = sizeRepo;
+        this.colorRepo = colorRepo;
     }
 
     public List<ProductDTO> getAll() {
@@ -30,7 +40,6 @@ public class ProductService {
     public List<ProductDTO> getActive() {
         return repo.findByStatus("ACTIVE").stream().map(this::toDTO).collect(Collectors.toList());
     }
-
 
     public ProductDTO create(ProductDTO dto) {
         Product p = toEntity(dto);
@@ -43,19 +52,33 @@ public class ProductService {
 
         p.setName(dto.getName());
         p.setPrice(dto.getPrice());
-        p.setSize(dto.getSize());
-        p.setColor(dto.getColor());
         p.setStock(dto.getStock());
         p.setImage(dto.getImage());
         p.setStatus(dto.getStatus());
         p.setDescription(dto.getDescription());
 
-        // ✅ THÊM DÒNG NÀY
+        // ✅ SỬA: set Size từ ID
+        if (dto.getSizeId() != null) {
+            Size size = sizeRepo.findById(dto.getSizeId()).orElse(null);
+            p.setSize(size);
+        }
+
+        // ✅ SỬA: set Color từ ID
+        if (dto.getColorId() != null) {
+            Color color = colorRepo.findById(dto.getColorId()).orElse(null);
+            p.setColor(color);
+        }
+
         if (dto.getCategoryId() != null) {
             p.setCategory(categoryRepo.findById(dto.getCategoryId()).orElse(null));
         }
 
         return toDTO(repo.save(p));
+    }
+
+    public ProductDTO getById(Long id) {
+        Product product = repo.findById(id).orElseThrow();
+        return toDTO(product);
     }
 
     public void delete(Long id) {
@@ -64,14 +87,15 @@ public class ProductService {
         repo.save(p);
     }
 
-
     private ProductDTO toDTO(Product p) {
         return new ProductDTO(
                 p.getId(),
                 p.getName(),
                 p.getPrice(),
-                p.getSize(),
-                p.getColor(),
+                p.getSize() != null ? p.getSize().getId() : null,     // ✅ sizeId
+                p.getSize() != null ? p.getSize().getSizeName() : null, // ✅ sizeName
+                p.getColor() != null ? p.getColor().getId() : null,    // ✅ colorId
+                p.getColor() != null ? p.getColor().getColorName() : null, // ✅ colorName
                 p.getStock(),
                 p.getImage(),
                 p.getStatus(),
@@ -85,23 +109,32 @@ public class ProductService {
         return toDTO(repo.save(p));
     }
 
+
     private Product toEntity(ProductDTO dto) {
         Product p = new Product();
 
         p.setId(dto.getId());
         p.setName(dto.getName());
         p.setPrice(dto.getPrice());
-        p.setSize(dto.getSize());
-        p.setColor(dto.getColor());
         p.setStock(dto.getStock());
         p.setImage(dto.getImage());
         p.setStatus(dto.getStatus());
         p.setDescription(dto.getDescription());
 
+        // ✅ SỬA: set Size từ ID
+        if (dto.getSizeId() != null) {
+            Size size = sizeRepo.findById(dto.getSizeId()).orElse(null);
+            p.setSize(size);
+        }
+
+        // ✅ SỬA: set Color từ ID
+        if (dto.getColorId() != null) {
+            Color color = colorRepo.findById(dto.getColorId()).orElse(null);
+            p.setColor(color);
+        }
+
         if (dto.getCategoryId() != null) {
-            p.setCategory(
-                    categoryRepo.findById(dto.getCategoryId()).orElse(null)
-            );
+            p.setCategory(categoryRepo.findById(dto.getCategoryId()).orElse(null));
         }
 
         return p;

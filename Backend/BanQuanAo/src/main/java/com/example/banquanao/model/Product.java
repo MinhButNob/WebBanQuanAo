@@ -6,7 +6,6 @@ import jakarta.persistence.*;
 @Table(name = "products")
 
 public class Product {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -16,9 +15,16 @@ public class Product {
     private Double price;
 
 
-    private String size;
 
-    private String color;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "size_id")
+    private Size size;
+
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "color_id")
+    private Color color;
 
     private Integer stock;
 
@@ -35,7 +41,9 @@ public class Product {
     public Product() {
     }
 
-    public Product(Long id, String name, Double price, String size, String color, Integer stock, String image, String status, String description, Category category) {
+    // Constructor cập nhật
+    public Product(Long id, String name, Double price, Size size, Color color,
+                   Integer stock, String image, String status, String description, Category category) {
         this.id = id;
         this.name = name;
         this.price = price;
@@ -48,6 +56,7 @@ public class Product {
         this.category = category;
     }
 
+    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -72,19 +81,19 @@ public class Product {
         this.price = price;
     }
 
-    public String getSize() {
+    public Size getSize() {
         return size;
     }
 
-    public void setSize(String size) {
+    public void setSize(Size size) {
         this.size = size;
     }
 
-    public String getColor() {
+    public Color getColor() {
         return color;
     }
 
-    public void setColor(String color) {
+    public void setColor(Color color) {
         this.color = color;
     }
 
