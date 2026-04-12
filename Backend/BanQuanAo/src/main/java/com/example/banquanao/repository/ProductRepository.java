@@ -1,0 +1,12 @@
+package com.example.banquanao.repository;
+
+import com.example.banquanao.model.Product;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+
+public interface ProductRepository extends JpaRepository<Product, Long> {
+
+    List<Product> findByStatus(String status);
+    List<Product> findByCategoryIdAndStatus(Long categoryId, String status);
+}

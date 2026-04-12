@@ -1,0 +1,58 @@
+package com.example.banquanao.controller;
+
+import com.example.banquanao.model.Category;
+import com.example.banquanao.repository.CategoryRepository;
+import com.example.banquanao.service.CategoryService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/categories")
+@CrossOrigin(origins = "http://localhost:5173")
+public class CategoryController {
+
+    @Autowired
+    private CategoryRepository repo;
+
+    private final CategoryService service;
+
+    public CategoryController(CategoryService service) {
+        this.service = service;
+    }
+
+    @GetMapping
+    public List<Category> getAll() {
+        return service.findAll();
+    }
+
+    // ========== THÊM API NÀY ==========
+    @GetMapping("/{id}")
+    public ResponseEntity<Category> getById(@PathVariable Long id) {
+        try {
+            Category category = service.findById(id);
+            return ResponseEntity.ok(category);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+    // ==================================
+
+    @PostMapping
+    public Category save(@RequestBody Category category) {
+        return service.save(category);
+    }
+
+    @PutMapping("/{id}")
+    public Category update(@PathVariable Long id, @RequestBody Category category) {
+        return service.update(id, category);
+    }
+
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id) {
+        service.delete(id);
+    }
+}
