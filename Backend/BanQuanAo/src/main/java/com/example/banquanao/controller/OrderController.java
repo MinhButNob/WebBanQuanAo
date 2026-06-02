@@ -111,6 +111,25 @@ public class OrderController {
                 String newStatus = body.get("status");
                 if (newStatus != null) {
                     order.setStatus(newStatus);
+
+                    if ("CANCELLED".equalsIgnoreCase(newStatus)) {
+                        String cancellationReason = body.get("cancellationReason");
+                        if (cancellationReason == null || cancellationReason.trim().isEmpty()) {
+                            cancellationReason = body.get("cancelReason");
+                        }
+
+                        if (cancellationReason == null || cancellationReason.trim().isEmpty()) {
+                            return ResponseEntity.badRequest()
+                                    .body(Map.of("message", "Vui lòng nhập lý do hủy đơn"));
+                        }
+
+                        order.setCancellationReason(cancellationReason.trim());
+                    }
+
+                    if (!"CANCELLED".equalsIgnoreCase(newStatus)) {
+                        order.setCancellationReason(null);
+                    }
+
                     orderRepository.save(order);
                     return ResponseEntity.ok(Map.of("message", "Cập nhật thành công"));
                 }

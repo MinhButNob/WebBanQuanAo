@@ -66,9 +66,9 @@
                   placeholder="Tìm kiếm sản phẩm..."
                   class="form-control form-control-sm search-input"
                 />
-                <button type="submit" class="btn btn-dark btn-sm ms-2">
+                <!-- <button type="submit" class="btn btn-dark btn-sm ms-2">
                   <i class="bi bi-search"></i>
-                </button>
+                </button> -->
               </form>
               <div
                 v-if="searchResults.length > 0 && searchKeyword"
@@ -109,11 +109,11 @@
                     <i class="bi bi-bag-check me-2"></i> Đơn hàng của tôi
                   </router-link>
                 </li>
-                <li>
+                <!-- <li>
                   <router-link class="dropdown-item" to="/change-password">
                     <i class="bi bi-key me-2"></i> Đổi mật khẩu
                   </router-link>
-                </li>
+                </li> -->
                 <li><hr class="dropdown-divider" /></li>
                 <li>
                   <a class="dropdown-item text-danger" @click="logout" href="#">

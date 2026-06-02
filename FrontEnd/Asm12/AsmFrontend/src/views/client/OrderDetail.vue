@@ -19,7 +19,10 @@
           <div class="card-body">
             <div class="d-flex justify-content-between align-items-center">
               <div>
-                <span :class="['badge', getStatusClass(order.status)]" style="font-size: 14px;">
+                <span
+                  :class="['badge', getStatusClass(order.status)]"
+                  style="font-size: 14px"
+                >
                   {{ getStatusText(order.status) }}
                 </span>
                 <div class="mt-2">
@@ -54,6 +57,13 @@
                 <strong>Ghi chú:</strong> {{ order.note }}
               </div>
             </div>
+
+            <div
+              v-if="order.status === 'CANCELLED' && order.cancellationReason"
+              class="alert alert-warning mt-3 mb-0"
+            >
+              <strong>Lý do hủy đơn:</strong> {{ order.cancellationReason }}
+            </div>
           </div>
         </div>
 
@@ -84,8 +94,8 @@
                     </td>
                     <td>
                       <small class="text-muted">
-                        Size: {{ item.size || '--' }}<br />
-                        Màu: {{ item.color || '--' }}
+                        Size: {{ item.size || "--" }}<br />
+                        Màu: {{ item.color || "--" }}
                       </small>
                     </td>
                     <td>{{ formatPrice(item.price) }}</td>
@@ -103,7 +113,7 @@
 
       <!-- Cột phải: Tổng tiền -->
       <div class="col-lg-4">
-        <div class="card sticky-top" style="top: 20px;">
+        <div class="card sticky-top" style="top: 20px">
           <div class="card-header bg-light">
             <h5 class="mb-0">💰 Tổng tiền</h5>
           </div>
@@ -123,20 +133,22 @@
             <hr />
             <div class="d-flex justify-content-between mb-3">
               <strong class="fs-5">Tổng cộng</strong>
-              <strong class="fs-5 text-danger">{{ formatPrice(order.total) }}</strong>
+              <strong class="fs-5 text-danger">{{
+                formatPrice(order.total)
+              }}</strong>
             </div>
 
             <div class="d-grid gap-2">
-              <button 
-                v-if="order.status === 'PENDING'" 
-                class="btn btn-danger" 
+              <button
+                v-if="order.status === 'PENDING'"
+                class="btn btn-danger"
                 @click="cancelOrder"
               >
                 Hủy đơn hàng
               </button>
-              <button 
-                v-if="order.status === 'COMPLETED'" 
-                class="btn btn-success" 
+              <button
+                v-if="order.status === 'COMPLETED'"
+                class="btn btn-success"
                 @click="buyAgain"
               >
                 Mua lại
@@ -145,17 +157,33 @@
 
             <!-- Theo dõi đơn hàng -->
             <div class="mt-4">
-              <div class="progress" style="height: 5px;">
-                <div 
-                  class="progress-bar bg-dark" 
+              <div class="progress" style="height: 5px">
+                <div
+                  class="progress-bar bg-dark"
                   :style="{ width: getProgressWidth() }"
                 ></div>
               </div>
               <div class="d-flex justify-content-between mt-2 small">
-                <span class="text-success" v-if="order.status !== 'CANCELLED'">✅ Đặt hàng</span>
-                <span class="text-success" v-if="['CONFIRMED','SHIPPING','COMPLETED'].includes(order.status)">✅ Xác nhận</span>
-                <span class="text-success" v-if="['SHIPPING','COMPLETED'].includes(order.status)">✅ Giao hàng</span>
-                <span class="text-success" v-if="order.status === 'COMPLETED'">✅ Hoàn thành</span>
+                <span class="text-success" v-if="order.status !== 'CANCELLED'"
+                  >✅ Đặt hàng</span
+                >
+                <span
+                  class="text-success"
+                  v-if="
+                    ['CONFIRMED', 'SHIPPING', 'COMPLETED'].includes(
+                      order.status,
+                    )
+                  "
+                  >✅ Xác nhận</span
+                >
+                <span
+                  class="text-success"
+                  v-if="['SHIPPING', 'COMPLETED'].includes(order.status)"
+                  >✅ Giao hàng</span
+                >
+                <span class="text-success" v-if="order.status === 'COMPLETED'"
+                  >✅ Hoàn thành</span
+                >
               </div>
             </div>
           </div>
@@ -174,7 +202,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import axios from "axios";
 
 export default {
   name: "OrderDetail",
@@ -182,7 +210,7 @@ export default {
   data() {
     return {
       order: null,
-      loading: false
+      loading: false,
     };
   },
 
@@ -195,33 +223,37 @@ export default {
       this.loading = true;
       try {
         const orderId = this.$route.params.id;
-        const response = await axios.get(`http://localhost:8080/api/orders/${orderId}`);
+        const response = await axios.get(
+          `http://localhost:8080/api/orders/${orderId}`,
+        );
         this.order = response.data;
       } catch (error) {
-        console.error('Lỗi:', error);
-        alert('Không thể tải chi tiết đơn hàng!');
+        console.error("Lỗi:", error);
+        alert("Không thể tải chi tiết đơn hàng!");
       } finally {
         this.loading = false;
       }
     },
 
     async cancelOrder() {
-      if (confirm('Bạn có chắc muốn hủy đơn hàng này?')) {
+      if (confirm("Bạn có chắc muốn hủy đơn hàng này?")) {
         try {
           // Gọi API hủy đơn hàng
-          await axios.put(`http://localhost:8080/api/orders/${this.order.id}/cancel`);
-          alert('Đã hủy đơn hàng!');
+          await axios.put(
+            `http://localhost:8080/api/orders/${this.order.id}/cancel`,
+          );
+          alert("Đã hủy đơn hàng!");
           this.loadOrderDetail(); // Reload
         } catch (error) {
-          alert('Hủy đơn hàng thất bại!');
+          alert("Hủy đơn hàng thất bại!");
         }
       }
     },
 
     buyAgain() {
       // Thêm lại sản phẩm vào giỏ hàng
-      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-      this.order.items.forEach(item => {
+      const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+      this.order.items.forEach((item) => {
         cart.push({
           id: item.productId,
           name: item.productName,
@@ -229,59 +261,59 @@ export default {
           quantity: item.quantity,
           image: item.image,
           sizeName: item.size,
-          colorName: item.color
+          colorName: item.color,
         });
       });
-      localStorage.setItem('cart', JSON.stringify(cart));
-      window.dispatchEvent(new Event('cart-updated'));
-      alert('Đã thêm sản phẩm vào giỏ hàng!');
-      this.$router.push('/cart');
+      localStorage.setItem("cart", JSON.stringify(cart));
+      window.dispatchEvent(new Event("cart-updated"));
+      alert("Đã thêm sản phẩm vào giỏ hàng!");
+      this.$router.push("/cart");
     },
 
     getProgressWidth() {
       const statusMap = {
-        'PENDING': 25,
-        'CONFIRMED': 50,
-        'SHIPPING': 75,
-        'COMPLETED': 100,
-        'CANCELLED': 0
+        PENDING: 25,
+        CONFIRMED: 50,
+        SHIPPING: 75,
+        COMPLETED: 100,
+        CANCELLED: 0,
       };
-      return statusMap[this.order?.status] + '%';
+      return statusMap[this.order?.status] + "%";
     },
 
     formatPrice(price) {
-      if (!price) return '0 ₫';
-      return price.toLocaleString('vi-VN') + ' ₫';
+      if (!price) return "0 ₫";
+      return price.toLocaleString("vi-VN") + " ₫";
     },
 
     formatDate(dateString) {
-      if (!dateString) return '';
+      if (!dateString) return "";
       const date = new Date(dateString);
       return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}`;
     },
 
     getStatusText(status) {
       const map = {
-        'PENDING': '⏳ Chờ xác nhận',
-        'CONFIRMED': '✅ Đã xác nhận',
-        'SHIPPING': '🚚 Đang giao hàng',
-        'COMPLETED': '🎉 Hoàn thành',
-        'CANCELLED': '❌ Đã hủy'
+        PENDING: "⏳ Chờ xác nhận",
+        CONFIRMED: "✅ Đã xác nhận",
+        SHIPPING: "🚚 Đang giao hàng",
+        COMPLETED: "🎉 Hoàn thành",
+        CANCELLED: "❌ Đã hủy",
       };
       return map[status] || status;
     },
 
     getStatusClass(status) {
       const map = {
-        'PENDING': 'bg-warning text-dark',
-        'CONFIRMED': 'bg-info text-dark',
-        'SHIPPING': 'bg-primary text-white',
-        'COMPLETED': 'bg-success text-white',
-        'CANCELLED': 'bg-danger text-white'
+        PENDING: "bg-warning text-dark",
+        CONFIRMED: "bg-info text-dark",
+        SHIPPING: "bg-primary text-white",
+        COMPLETED: "bg-success text-white",
+        CANCELLED: "bg-danger text-white",
       };
       return map[status];
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -322,7 +354,7 @@ export default {
     width: 40px;
     height: 40px;
   }
-  
+
   .table {
     font-size: 12px;
   }

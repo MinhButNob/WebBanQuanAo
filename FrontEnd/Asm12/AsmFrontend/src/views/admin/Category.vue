@@ -132,7 +132,7 @@ export default {
 
       if (!this.category.name || !this.category.name.trim()) {
         this.errors.name = "Tên loại không được để trống";
-      } else if (this.category.name.trim().length < 3) {
+      } else if (this.category.name.trim().length < 2) {
         this.errors.name = "Tên phải >= 3 ký tự";
       }
 

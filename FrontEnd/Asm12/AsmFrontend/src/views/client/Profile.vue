@@ -18,9 +18,9 @@
               <router-link to="/orders" class="list-group-item list-group-item-action">
                 <i class="bi bi-bag-check me-2"></i> Đơn hàng của tôi
               </router-link>
-              <router-link to="/change-password" class="list-group-item list-group-item-action">
+              <!-- <router-link to="/change-password" class="list-group-item list-group-item-action">
                 <i class="bi bi-key me-2"></i> Đổi mật khẩu
-              </router-link>
+              </router-link> -->
             </div>
           </div>
         </div>

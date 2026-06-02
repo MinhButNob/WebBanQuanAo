@@ -2,8 +2,10 @@ package com.example.banquanao.service;
 
 import com.example.banquanao.model.Order;
 import com.example.banquanao.model.OrderItem;
+import com.example.banquanao.model.Product;
 import com.example.banquanao.repository.OrderRepository;
 import com.example.banquanao.repository.OrderItemRepository;
+import com.example.banquanao.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +21,9 @@ public class OrderService {
 
     @Autowired
     private OrderItemRepository orderItemRepository;
+
+    @Autowired
+    private ProductRepository productRepository;
 
     @Transactional
     public Order createOrder(Map<String, Object> orderData) {
@@ -56,13 +61,32 @@ public class OrderService {
         List<Map<String, Object>> items = (List<Map<String, Object>>) orderData.get("items");
 
         for (Map<String, Object> itemData : items) {
+            Long productId = Long.valueOf(itemData.get("productId").toString());
+            Integer quantity = Integer.valueOf(itemData.get("quantity").toString());
+
+            if (quantity == null || quantity <= 0) {
+                throw new IllegalArgumentException("So luong mua khong hop le");
+            }
+
+            Product product = productRepository.findById(productId)
+                    .orElseThrow(() -> new IllegalArgumentException("Khong tim thay san pham id=" + productId));
+
+            Integer currentStock = product.getStock() == null ? 0 : product.getStock();
+            if (currentStock < quantity) {
+                throw new IllegalArgumentException(
+                        "San pham '" + product.getName() + "' chi con " + currentStock + " san pham trong kho");
+            }
+
+            product.setStock(currentStock - quantity);
+            productRepository.save(product);
+
             OrderItem item = new OrderItem();
             item.setOrder(savedOrder);
-            item.setProductId(Long.valueOf(itemData.get("productId").toString()));
+            item.setProductId(productId);
             item.setProductName((String) itemData.get("productName"));
             item.setSize((String) itemData.get("size"));
             item.setColor((String) itemData.get("color"));
-            item.setQuantity(Integer.valueOf(itemData.get("quantity").toString()));
+            item.setQuantity(quantity);
             item.setPrice(Double.valueOf(itemData.get("price").toString()));
             item.setImage((String) itemData.get("image"));
 

@@ -29,6 +29,7 @@ import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import Size from "@/views/admin/Size.vue";
 import OrderSuccess from "@/views/client/OrderSuccess.vue";
 import Orders from "../views/admin/Orders.vue";
+import AdminOrderDetail from "../views/admin/OrderDetail.vue";
 import OrderDetail from "@/views/client/OrderDetail.vue";
 import ClientOrders from "@/views/client/ClientOrders.vue";
 import Profile from "@/views/client/Profile.vue";
@@ -51,7 +52,11 @@ const routes = [
         component: Profile,
         meta: { requiresAuth: true },
       },
-       { path: "category/:id", name: "ProductsByCategory", component: ProductsByCategory },
+      {
+        path: "category/:id",
+        name: "ProductsByCategory",
+        component: ProductsByCategory,
+      },
     ],
   },
 
@@ -65,6 +70,11 @@ const routes = [
       { path: "products", component: AdminProducts },
       { path: "employees", component: EmployeeManager },
       { path: "orders", component: AdminOrders },
+      {
+        path: "orders/:id",
+        name: "AdminOrderDetail",
+        component: AdminOrderDetail,
+      },
       { path: "customers", component: AdminCustomers },
       { path: "sale", component: AdminSale },
       { path: "category", component: Category },
