@@ -1,12 +1,6 @@
---Cach chay file
-tao database bang portgre sql
+docs: bổ sung hướng dẫn import và khởi chạy dự án bằng Docker
 
- mo inteliji va import file backend.
-config lai database
-
-chay file
-
-sau do dung visusal studio import file frontend
-chay file
-
-.
+- Hướng dẫn clone source code
+- Cấu hình biến môi trường
+- Build và chạy container Docker
+- Import database
